@@ -1,10 +1,16 @@
-//Importing the dependencies and required components
+//Importing the dependencies,styles and required components
 import { React, useContext, useState } from 'react';
 import tw from 'twin.macro';
 import { Button, TextField } from "@material-ui/core";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { SocketContext } from "../SocketContext";
+import { SocketContext,socket } from "../SocketContext";
 import { Assignment, Phone, PhoneDisabled, Telegram, WhatsApp } from '@material-ui/icons';
+import { Input } from "antd";
+import chat_show from "../images/chat_show.svg";
+import "./chatstyles.css";
+
+//Using Search from Input of antd framework
+const { Search } = Input;
 
 function Particulars() {
     //Using useState to set the ID of the user to which call is going to make
@@ -15,8 +21,29 @@ function Particulars() {
             callAccepted, // To check whether the call has been accepted or not
             callEnded, // To check whether the call has been ended or not
             leaveCall, // To leave the call when clicked on hang call button
-            callUser // user who is going to make the call
+            callUser, // user who is going to make the call
+            sendMsg: sendMsgFunc, // To send the message chat
+            chat, // Message array for chat
+            setChat, //To set Message array
           } = useContext(SocketContext);
+
+    const [sendMsg, setSendMsg] = useState(""); //To send the chat message 
+    //On receive message, store to the chat message array
+    socket.on("msgRcv", ({ name, msg: value, sender }) => {
+        let msg = {};
+        msg.msg = value;
+        msg.type = "rcv";
+        msg.sender = sender;
+        msg.timestamp = Date.now();
+        setChat([...chat, msg]);
+    });
+
+    //To send the message on clicked
+    const onSearch = (value) => {
+        if (value && value.length) sendMsgFunc(value);
+        //setting the message to empty string after sending the message
+        setSendMsg("");
+    };
     return (
         <>
             <Actions>
@@ -76,6 +103,43 @@ function Particulars() {
                 )}
             </Actions>
             <br />
+
+            {/* Show the chat section if the call has not been accepted and call has not been ended yet*/}
+            {callAccepted && !callEnded && (
+                <>
+                    <h1 style={{ fontSize: "30pt", color: '#39A2DB' }}>Chat</h1>
+                    {chat.length ? (
+                        <div className="msg_flex">
+                            {chat.map((msg) => (
+                                <div className={msg.type === "sent" ? "msg_sent" : "msg_rcv"}>
+                                    {msg.msg}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        // To add svg/image if chat has not started
+                        <div className="chat_img_div">
+                            <img src={chat_show} alt="msg_illus" className="img_illus" />
+                        </div>
+                    )}
+                    <br />
+
+                    {/* TextField and send button to send the message to Peer*/}
+                    <Search
+                        placeholder="Type your message"
+                        className="input_msg"
+                        enterButton="Send ✉"
+                        onChange={(e) => setSendMsg(e.target.value)}
+                        value={sendMsg}
+                        size="large"
+                        style={{ color: '#39A2DB', fontSize: "15pt", textDecoration : 'none'}}
+                        onSearch={onSearch}
+                    />
+                    <br />
+                    <br />
+                    <br />
+                </>
+            )}
             {/* Textfield to paste the ID to make the call which on change, sets the ID to which call is going to happen*/}
             <TextField 
                 label="ID to Call"
