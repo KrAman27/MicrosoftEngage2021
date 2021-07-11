@@ -1,0 +1,39 @@
+/* Styles for chat messages */
+.input_msg {
+  font-family: Gilroy-light;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.img_illus {
+  height: 15rem;
+}
+
+.chat_img_div {
+  display: grid;
+  place-items: center;
+}
+
+.msg_flex > div {
+  background-color: #fdfdfd;
+  border: 1px solid #bebebe;
+  border-radius: 4px;
+  padding: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.msg_flex {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100%;
+  max-height: 250px;
+  overflow-y: scroll;
+}
+.msg_flex::-webkit-scrollbar {
+  display: none;
+}
+
+.msg_sent {
+  align-self: flex-end;
+}
