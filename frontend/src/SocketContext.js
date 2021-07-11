@@ -7,8 +7,8 @@ import Peer from "simple-peer";
 const SocketContext = createContext();
 
 //Backend server is running on the following application
-// export const socket = io('https://video-call-app-aks.herokuapp.com');
-export const socket = io('http://localhost:5000');
+export const socket = io('https://mce-connect.herokuapp.com/');
+// export const socket = io('http://localhost:5000');
 
 const ContextProvider = ({ children }) => {
     // useState for corresponding features 
