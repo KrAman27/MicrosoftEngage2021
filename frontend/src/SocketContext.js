@@ -7,7 +7,8 @@ import Peer from "simple-peer";
 const SocketContext = createContext();
 
 //Backend server is running on the following application
-const socket = io('https://video-call-app-aks.herokuapp.com');
+// const socket = io('https://video-call-app-aks.herokuapp.com');
+export const socket = io('http://localhost:5000');
 
 const ContextProvider = ({ children }) => {
     // useState for corresponding features 
@@ -23,6 +24,8 @@ const ContextProvider = ({ children }) => {
     const [userVdoStatus, setUserVdoStatus] = useState(); // to set other user's video status
     const [myMicStatus, setMyMicStatus] = useState(true); // to set my mic status
     const [userMicStatus, setUserMicStatus] = useState(); // to set other user's mic status
+    const [chat, setChat] = useState([]); // chat array containing messages
+    const [msgRcv, setMsgRcv] = useState(""); // for message which is to be sent
 
     const myVideo = useRef();
     const userVideo = useRef();
@@ -38,7 +41,6 @@ const ContextProvider = ({ children }) => {
             setStream(currentStream);
             myVideo.current.srcObject = currentStream;
         });
-
 
         if (localStorage.getItem("name")) {
             setName(localStorage.getItem("name"));
@@ -75,6 +77,14 @@ const ContextProvider = ({ children }) => {
             setCall({ isReceivingCall: true, from, name: callerName, signal });
         });
 
+        //to set the message 
+        socket.on("msgRcv", ({ name, msg: value, sender }) => {
+            setMsgRcv({ value, sender });
+            setTimeout(() => {
+                setMsgRcv({});
+            }, 2000);
+        });
+
     }, []);
 
     // to answer the call, if there is any incoming call
@@ -106,7 +116,8 @@ const ContextProvider = ({ children }) => {
         });
 
         peer.signal(call.signal);
-
+        
+        //Building the connection
         connectionRef.current = peer;
     };
 
@@ -150,6 +161,7 @@ const ContextProvider = ({ children }) => {
             });
         });
 
+        //Building the connection
         connectionRef.current = peer;
     };
 
@@ -179,11 +191,22 @@ const ContextProvider = ({ children }) => {
 
     //ending the call
     const leaveCall = () => {
-        setCallEnded(true);
+        setCallEnded(true); //Ending the call
 
-        connectionRef.current.destroy();
-        socket.emit("endCall", { id: otherUser });
-        window.location.reload();
+        connectionRef.current.destroy(); //Destroying the call connection
+        socket.emit("endCall", { id: otherUser }); //Sending the request to backend server to end the call
+        window.location.reload(); //Reload the window
+    };
+
+    //Sending the message from client to backend server 
+    const sendMsg = (value) => {
+        socket.emit("msgUser", { name, to: otherUser, msg: value, sender: name });//Sending the message to the server
+        let msg = {};
+        msg.msg = value;
+        msg.type = "sent";
+        msg.timestamp = Date.now();
+        msg.sender = name;
+        setChat([...chat, msg]);
     };
 
     //Return all the useState variables and required functions that have been made
@@ -210,7 +233,12 @@ const ContextProvider = ({ children }) => {
             updateVideo,
             myMicStatus,
             userMicStatus,
-            updateMic
+            updateMic,
+            sendMsg,
+            msgRcv,
+            chat,
+            setChat,
+            setMsgRcv,
         }}>
             {children}
         </SocketContext.Provider>
