@@ -75,7 +75,7 @@ MCE Connect is a Real Time Web based Video Calling and Message Chat Application 
 ### After Connecting
 ![connect](https://user-images.githubusercontent.com/67097430/125348462-de984080-e379-11eb-8464-bab172c008ba.png)
 
-### Chat Features 📧
+### Chat Feature 📧
 ![chat](https://user-images.githubusercontent.com/67097430/125348724-3767d900-e37a-11eb-8ef5-144bd603e53e.PNG)
 
 ## Run Locally
